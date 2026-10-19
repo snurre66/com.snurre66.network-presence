@@ -30,7 +30,7 @@ class PhoneDriver extends Homey.Driver {
 
     // Always offer manual IP entry as the first choice
     resultList.push({
-      name: userName ? `➕ ${userName} (Skriv inn IP)` : '➕ Skriv inn IP manuelt',
+      name: '➕ Skriv inn IP manuelt',
       data: { id: `manual_${Date.now()}` },
       settings: {
         ip: '192.168.68.',
@@ -46,10 +46,8 @@ class PhoneDriver extends Homey.Driver {
       if (discovered && discovered.length > 0) {
         for (const dev of discovered) {
           const idSafe = dev.ip ? dev.ip.replace(/[^a-zA-Z0-9]/g, '_') : `dev_${Date.now()}`;
-          const lastOctet = dev.ip ? dev.ip.split('.').pop() : '';
-          const displayName = userName ? `📱 ${userName} (.${lastOctet})` : dev.name;
           resultList.push({
-            name: displayName,
+            name: dev.name,
             data: {
               id: `phone_${idSafe}_${Date.now()}`
             },
