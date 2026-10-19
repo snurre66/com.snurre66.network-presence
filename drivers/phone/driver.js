@@ -2,6 +2,7 @@
 
 const Homey = require('homey');
 const NetworkScanner = require('../../lib/NetworkScanner');
+const UserHelper = require('../../lib/UserHelper');
 
 class PhoneDriver extends Homey.Driver {
   async onInit() {
@@ -9,12 +10,31 @@ class PhoneDriver extends Homey.Driver {
   }
 
   async onPair(session) {
-    let selectedUser = { userId: 'none', userName: '' };
+    let selectedUser = { userId: 'none', userName: '', firstName: '' };
 
     session.setHandler('set_selected_user', async (data) => {
       this.log('User selected in step 1:', data);
-      selectedUser = data || { userId: 'none', userName: '' };
+      const userId = data ? data.userId : 'none';
+      const userName = data ? data.userName : '';
+      const firstName = UserHelper.getFirstName(userName || userId) || '';
+      selectedUser = { userId, userName, firstName };
       return true;
+    });
+
+    session.setHandler('get_selected_user', async () => {
+      return selectedUser;
+    });
+
+    session.setHandler('scan_network', async () => {
+      this.log('Scanning network for devices during pairing...');
+      try {
+        const tracker = this.homey.app ? this.homey.app.mdnsTracker : null;
+        const discovered = await NetworkScanner.scanSubnet(tracker);
+        return discovered || [];
+      } catch (err) {
+        this.error('Error during scan_network:', err);
+        return [];
+      }
     });
 
     session.setHandler('list_devices', async () => {

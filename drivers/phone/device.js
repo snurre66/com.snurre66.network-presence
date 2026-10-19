@@ -21,6 +21,7 @@ class PhoneDevice extends Homey.Device {
       await this.setCapabilityValue('alarm_presence', false).catch(this.error);
     }
 
+
     this.lastSeenTime = this.isPresent ? Date.now() : 0;
     this.isProbing = false;
 
@@ -208,6 +209,8 @@ class PhoneDevice extends Homey.Device {
     if (changedKeys.includes('hostname')) this.hostname = (newSettings.hostname || '').trim().toLowerCase();
     if (changedKeys.includes('away_delay')) this.awayDelayMinutes = Number(newSettings.away_delay) || 10;
     if (changedKeys.includes('tcp_ports')) this.tcpPorts = this._parsePorts(newSettings.tcp_ports);
+
+
   }
 
   async onDeleted() {
