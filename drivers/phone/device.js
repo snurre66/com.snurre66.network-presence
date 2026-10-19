@@ -23,7 +23,6 @@ class PhoneDevice extends Homey.Device {
 
     this.lastSeenTime = this.isPresent ? Date.now() : 0;
     this.isProbing = false;
-    this.isRediscovering = false;
 
     // Attach to shared mDNS tracker
     this._setupmDNSListener();
@@ -161,25 +160,6 @@ class PhoneDevice extends Homey.Device {
 
     const silentMs = Date.now() - this.lastSeenTime;
     const graceMs = this.awayDelayMinutes * 60 * 1000;
-
-    // If device is silent for >90s, check if phone got a new IP via DHCP before declaring away
-    if (silentMs >= 90000 && this.settings.auto_rediscover !== false && !this.isRediscovering) {
-      this.isRediscovering = true;
-      try {
-        const newIp = await NetworkScanner.findMigratedDevice([this.currentIP], this.tcpPorts);
-        if (newIp && newIp !== this.currentIP) {
-          this.log(`[Auto-Migration] Detected phone migrated to new IP: ${this.currentIP} -> ${newIp}`);
-          this.currentIP = newIp;
-          await this.setSettings({ ip: newIp }).catch(this.error);
-          await this.onDeviceDetected('auto_rediscover');
-          return;
-        }
-      } catch (err) {
-        this.error('Error during IP auto-rediscovery:', err.message);
-      } finally {
-        this.isRediscovering = false;
-      }
-    }
 
     if (silentMs >= graceMs) {
       this.log(`Presence transition: HOME -> AWAY (silent for ${Math.round(silentMs / 1000)}s)`);

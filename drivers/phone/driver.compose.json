@@ -66,19 +66,7 @@
         "no": "Lokalt vertsnavn som slutter på .local (f.eks. Thomas-iPhone.local). Tillater automatisk gjenkjenning dersom IP endres."
       }
     },
-    {
-      "id": "auto_rediscover",
-      "type": "checkbox",
-      "value": true,
-      "label": {
-        "en": "Auto-Discover New IP on Reconnect",
-        "no": "Automatisk søk ved endret IP"
-      },
-      "hint": {
-        "en": "Automatically scans local network and migrates to new IP if phone receives a new DHCP address",
-        "no": "Søker automatisk i lokalnettverket og migrerer til ny IP dersom telefonen tildeles ny adresse"
-      }
-    },
+
     {
       "id": "away_delay",
       "type": "number",
