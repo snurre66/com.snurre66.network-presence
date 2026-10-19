@@ -159,16 +159,16 @@
           }
         },
         {
-          "id": "mac",
-          "type": "text",
+          "id": "auto_rediscover",
+          "type": "checkbox",
+          "value": true,
           "label": {
-            "en": "MAC Address",
-            "no": "MAC-adresse"
+            "en": "Auto-Discover New IP on Reconnect",
+            "no": "Automatisk søk ved endret IP"
           },
-          "value": "",
           "hint": {
-            "en": "MAC address of the device (e.g. 20:23:51:49:35:90)",
-            "no": "MAC-adressen til telefonen (f.eks. 20:23:51:49:35:90)"
+            "en": "Automatically scans local network and migrates to new IP if phone receives a new DHCP address",
+            "no": "Søker automatisk i lokalnettverket og migrerer til ny IP dersom telefonen tildeles ny adresse"
           }
         },
         {

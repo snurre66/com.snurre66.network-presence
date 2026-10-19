@@ -2,7 +2,6 @@
 
 const Homey = require('homey');
 const ProbeEngine = require('../../lib/ProbeEngine');
-const ArpHelper = require('../../lib/ArpHelper');
 const NetworkScanner = require('../../lib/NetworkScanner');
 
 class PhoneDevice extends Homey.Device {
@@ -12,7 +11,6 @@ class PhoneDevice extends Homey.Device {
     this.settings = this.getSettings() || {};
     this.currentIP = (this.settings.ip || '').trim();
     this.hostname = (this.settings.hostname || '').trim().toLowerCase();
-    this.mac = (this.settings.mac || '').trim().toLowerCase();
     this.awayDelayMinutes = Number(this.settings.away_delay) || 10;
     this.tcpPorts = this._parsePorts(this.settings.tcp_ports);
 
@@ -25,12 +23,13 @@ class PhoneDevice extends Homey.Device {
 
     this.lastSeenTime = this.isPresent ? Date.now() : 0;
     this.isProbing = false;
+    this.isRediscovering = false;
 
     // Attach to shared mDNS tracker
     this._setupmDNSListener();
 
     // Start adaptive polling loop (30s when Home, 10s when Away)
-    this._scheduleNextPoll(1000); // initial check after 1 second
+    this._scheduleNextPoll(1000);
   }
 
   _parsePorts(portsString) {
@@ -48,7 +47,7 @@ class PhoneDevice extends Homey.Device {
       const cleanHost = (hostname || '').toLowerCase();
       if (this.hostname && cleanHost === this.hostname) {
         if (ip && ip !== this.currentIP) {
-          this.log(`IP changed for hostname ${this.hostname}: ${this.currentIP} -> ${ip}`);
+          this.log(`IP changed via mDNS for ${this.hostname}: ${this.currentIP} -> ${ip}`);
           this.currentIP = ip;
           this.setSettings({ ip }).catch(this.error);
         }
@@ -129,7 +128,7 @@ class PhoneDevice extends Homey.Device {
   async onDeviceDetected(source = 'unknown') {
     this.lastSeenTime = Date.now();
 
-    // Automatically enrich missing fields (MAC address and hostname) in background
+    // Auto-detect hostname if missing
     this._enrichMissingFields().catch(this.error);
 
     if (!this.isPresent) {
@@ -146,38 +145,14 @@ class PhoneDevice extends Homey.Device {
     }
   }
 
-  /**
-   * Automatically detect and save missing MAC and hostname without manual input.
-   * @private
-   */
   async _enrichMissingFields() {
-    const updates = {};
-
-    // 1. Check ARP cache for missing MAC
-    if (!this.mac && this.currentIP) {
-      const arpTable = ArpHelper.getArpTable();
-      const foundMac = arpTable.get(this.currentIP);
-      if (foundMac) {
-        this.mac = foundMac;
-        updates.mac = foundMac;
-        this.log(`Auto-discovered MAC address for ${this.currentIP}: ${foundMac}`);
-      }
-    }
-
-    // 2. Check reverse DNS or mDNS cache for missing hostname
     if (!this.hostname && this.currentIP) {
       const host = await NetworkScanner.reverseDNS(this.currentIP).catch(() => null);
       if (host) {
         this.hostname = host.toLowerCase();
-        updates.hostname = host;
+        await this.setSettings({ hostname: host }).catch(this.error);
         this.log(`Auto-discovered hostname for ${this.currentIP}: ${host}`);
       }
-    }
-
-    if (Object.keys(updates).length > 0) {
-      await this.setSettings(updates).catch((err) => {
-        this.error('Could not save auto-discovered settings:', err.message);
-      });
     }
   }
 
@@ -186,6 +161,25 @@ class PhoneDevice extends Homey.Device {
 
     const silentMs = Date.now() - this.lastSeenTime;
     const graceMs = this.awayDelayMinutes * 60 * 1000;
+
+    // If device is silent for >90s, check if phone got a new IP via DHCP before declaring away
+    if (silentMs >= 90000 && this.settings.auto_rediscover !== false && !this.isRediscovering) {
+      this.isRediscovering = true;
+      try {
+        const newIp = await NetworkScanner.findMigratedDevice([this.currentIP], this.tcpPorts);
+        if (newIp && newIp !== this.currentIP) {
+          this.log(`[Auto-Migration] Detected phone migrated to new IP: ${this.currentIP} -> ${newIp}`);
+          this.currentIP = newIp;
+          await this.setSettings({ ip: newIp }).catch(this.error);
+          await this.onDeviceDetected('auto_rediscover');
+          return;
+        }
+      } catch (err) {
+        this.error('Error during IP auto-rediscovery:', err.message);
+      } finally {
+        this.isRediscovering = false;
+      }
+    }
 
     if (silentMs >= graceMs) {
       this.log(`Presence transition: HOME -> AWAY (silent for ${Math.round(silentMs / 1000)}s)`);
@@ -232,14 +226,8 @@ class PhoneDevice extends Homey.Device {
     this.settings = newSettings;
     if (changedKeys.includes('ip')) this.currentIP = (newSettings.ip || '').trim();
     if (changedKeys.includes('hostname')) this.hostname = (newSettings.hostname || '').trim().toLowerCase();
-    if (changedKeys.includes('mac')) this.mac = (newSettings.mac || '').trim().toLowerCase();
     if (changedKeys.includes('away_delay')) this.awayDelayMinutes = Number(newSettings.away_delay) || 10;
     if (changedKeys.includes('tcp_ports')) this.tcpPorts = this._parsePorts(newSettings.tcp_ports);
-
-    // If MAC or hostname were missing, attempt immediate enrichment
-    if (!this.mac || !this.hostname) {
-      this._enrichMissingFields().catch(this.error);
-    }
   }
 
   async onDeleted() {
