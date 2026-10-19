@@ -10,57 +10,49 @@ class PhoneDriver extends Homey.Driver {
 
   /**
    * Called during device pairing when the list_devices template is displayed.
-   * Performs an automated network scan to show all discovered devices.
+   * Performs an automated network scan to show all discovered devices,
+   * with a manual entry option at the top.
    */
   async onPairListDevices() {
     this.log('Scanning network for devices during pairing...');
+    const resultList = [];
+
+    // Always offer manual IP entry as the first choice
+    resultList.push({
+      name: '➕ Skriv inn IP manuelt',
+      data: { id: `manual_${Date.now()}` },
+      settings: {
+        ip: '192.168.68.',
+        hostname: '',
+        mac: ''
+      }
+    });
+
     try {
       const tracker = this.homey.app ? this.homey.app.mdnsTracker : null;
       const discovered = await NetworkScanner.scanSubnet(tracker);
 
-      if (!discovered || discovered.length === 0) {
-        // Return a default manual entry option if scan returned empty
-        return [
-          {
-            name: this.homey.__('pair.manual_device') || 'Manual Phone / Device',
-            data: { id: `manual_${Date.now()}` },
+      if (discovered && discovered.length > 0) {
+        for (const dev of discovered) {
+          const idSafe = dev.ip ? dev.ip.replace(/[^a-zA-Z0-9]/g, '_') : `dev_${Date.now()}`;
+          resultList.push({
+            name: dev.name,
+            data: {
+              id: `phone_${idSafe}_${Date.now()}`
+            },
             settings: {
-              ip: '192.168.68.',
-              hostname: '',
-              mac: ''
+              ip: dev.ip,
+              hostname: dev.hostname || '',
+              mac: dev.mac || ''
             }
-          }
-        ];
+          });
+        }
       }
-
-      return discovered.map((dev, idx) => {
-        const idSafe = dev.ip ? dev.ip.replace(/[^a-zA-Z0-9]/g, '_') : `idx_${idx}`;
-        return {
-          name: dev.name || `Device (${dev.ip})`,
-          data: {
-            id: `phone_${idSafe}_${Date.now()}`
-          },
-          settings: {
-            ip: dev.ip,
-            hostname: dev.hostname || '',
-            mac: ''
-          }
-        };
-      });
     } catch (err) {
       this.error('Error during onPairListDevices scan:', err);
-      return [
-        {
-          name: 'Manual Phone / Device',
-          data: { id: `manual_${Date.now()}` },
-          settings: {
-            ip: '192.168.68.',
-            hostname: '',
-            mac: ''
-          }
-        }
-      ];
     }
+
+    return resultList;
   }
 }
 
