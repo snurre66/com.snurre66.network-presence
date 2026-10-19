@@ -1,0 +1,15 @@
+{
+  "type": "string",
+  "title": {
+    "en": "Last Seen",
+    "no": "Sist sett"
+  },
+  "desc": {
+    "en": "Timestamp of when the device was last detected on the network.",
+    "no": "Tidspunkt for når enheten sist ble registrert på nettverket."
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/capabilities/last_seen.svg"
+}

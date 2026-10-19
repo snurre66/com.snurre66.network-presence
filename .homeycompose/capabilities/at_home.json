@@ -1,0 +1,24 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "At Home",
+    "no": "Hjemme"
+  },
+  "desc": {
+    "en": "True when the person is connected to the local network.",
+    "no": "Sann når personen er tilkoblet lokalnettet."
+  },
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "At Home",
+    "no": "Hjemme"
+  },
+  "insightsTitleFalse": {
+    "en": "Away",
+    "no": "Borte"
+  },
+  "uiComponent": "sensor",
+  "icon": "/assets/capabilities/at_home.svg"
+}

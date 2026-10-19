@@ -5,13 +5,20 @@
   },
   "class": "sensor",
   "capabilities": [
-    "alarm_presence"
+    "at_home",
+    "last_seen"
   ],
   "capabilitiesOptions": {
-    "alarm_presence": {
+    "at_home": {
       "title": {
-        "en": "Presence",
-        "no": "Tilstedeværelse"
+        "en": "At Home",
+        "no": "Hjemme"
+      }
+    },
+    "last_seen": {
+      "title": {
+        "en": "Last Seen",
+        "no": "Sist sett"
       }
     }
   },

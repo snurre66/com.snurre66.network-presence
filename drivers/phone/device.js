@@ -14,13 +14,27 @@ class PhoneDevice extends Homey.Device {
     this.awayDelayMinutes = Number(this.settings.away_delay) || 10;
     this.tcpPorts = this._parsePorts(this.settings.tcp_ports);
 
-    // Initial presence state
-    this.isPresent = this.getCapabilityValue('alarm_presence');
-    if (typeof this.isPresent !== 'boolean') {
-      this.isPresent = false;
-      await this.setCapabilityValue('alarm_presence', false).catch(this.error);
+    // Ensure smooth capability migration for existing devices
+    if (!this.hasCapability('at_home')) {
+      await this.addCapability('at_home').catch(this.error);
+    }
+    if (!this.hasCapability('last_seen')) {
+      await this.addCapability('last_seen').catch(this.error);
+    }
+    if (this.hasCapability('alarm_presence')) {
+      await this.removeCapability('alarm_presence').catch(this.error);
     }
 
+    // Initial presence state
+    this.isPresent = this.getCapabilityValue('at_home');
+    if (typeof this.isPresent !== 'boolean') {
+      this.isPresent = false;
+      await this.setCapabilityValue('at_home', false).catch(this.error);
+    }
+
+    if (this.getCapabilityValue('last_seen') === null) {
+      await this.setCapabilityValue('last_seen', 'Venter på første sjekk...').catch(this.error);
+    }
 
     this.lastSeenTime = this.isPresent ? Date.now() : 0;
     this.isProbing = false;
@@ -126,22 +140,24 @@ class PhoneDevice extends Homey.Device {
   }
 
   async onDeviceDetected(source = 'unknown') {
-    this.lastSeenTime = Date.now();
+    const now = Date.now();
+    this.lastSeenTime = now;
 
     // Auto-detect hostname if missing
     this._enrichMissingFields().catch(this.error);
+
+    const timeStr = new Date(now).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' });
+    await this.setCapabilityValue('last_seen', `I dag kl. ${timeStr}`).catch(this.error);
 
     if (!this.isPresent) {
       this.log(`Presence transition: AWAY -> HOME (source: ${source}, ip: ${this.currentIP})`);
       this.isPresent = true;
 
-      await this.setCapabilityValue('alarm_presence', true).catch(this.error);
+      await this.setCapabilityValue('at_home', true).catch(this.error);
 
       if (this.homey.app && this.homey.app.triggerTurnedHome) {
         this.homey.app.triggerTurnedHome.trigger(this).catch(this.error);
       }
-
-      this._syncHomeyPresence(true).catch(this.error);
     }
   }
 
@@ -166,31 +182,17 @@ class PhoneDevice extends Homey.Device {
       this.log(`Presence transition: HOME -> AWAY (silent for ${Math.round(silentMs / 1000)}s)`);
       this.isPresent = false;
 
-      await this.setCapabilityValue('alarm_presence', false).catch(this.error);
+      await this.setCapabilityValue('at_home', false).catch(this.error);
+
+      const timeStr = this.lastSeenTime
+        ? new Date(this.lastSeenTime).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })
+        : '';
+      const lastSeenText = timeStr ? `Borte (sist sett ${timeStr})` : 'Borte';
+      await this.setCapabilityValue('last_seen', lastSeenText).catch(this.error);
 
       if (this.homey.app && this.homey.app.triggerTurnedAway) {
         this.homey.app.triggerTurnedAway.trigger(this).catch(this.error);
       }
-
-      this._syncHomeyPresence(false).catch(this.error);
-    }
-  }
-
-  async _syncHomeyPresence(present) {
-    const userId = this.settings.homey_user;
-    if (!userId || userId === 'none') return;
-
-    try {
-      if (this.homey.presence && typeof this.homey.presence.setPresent === 'function') {
-        if (present) {
-          await this.homey.presence.setPresent({ user: userId });
-        } else {
-          await this.homey.presence.setAway({ user: userId });
-        }
-        this.log(`Homey presence synced for user ${userId} to ${present ? 'HOME' : 'AWAY'}`);
-      }
-    } catch (err) {
-      this.error('Could not sync user presence:', err.message);
     }
   }
 

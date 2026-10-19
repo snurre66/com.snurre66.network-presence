@@ -97,13 +97,20 @@
       },
       "class": "sensor",
       "capabilities": [
-        "alarm_presence"
+        "at_home",
+        "last_seen"
       ],
       "capabilitiesOptions": {
-        "alarm_presence": {
+        "at_home": {
           "title": {
-            "en": "Presence",
-            "no": "Tilstedeværelse"
+            "en": "At Home",
+            "no": "Hjemme"
+          }
+        },
+        "last_seen": {
+          "title": {
+            "en": "Last Seen",
+            "no": "Sist sett"
           }
         }
       },
@@ -248,5 +255,46 @@
       ],
       "id": "phone"
     }
-  ]
+  ],
+  "capabilities": {
+    "at_home": {
+      "type": "boolean",
+      "title": {
+        "en": "At Home",
+        "no": "Hjemme"
+      },
+      "desc": {
+        "en": "True when the person is connected to the local network.",
+        "no": "Sann når personen er tilkoblet lokalnettet."
+      },
+      "getable": true,
+      "setable": false,
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "At Home",
+        "no": "Hjemme"
+      },
+      "insightsTitleFalse": {
+        "en": "Away",
+        "no": "Borte"
+      },
+      "uiComponent": "sensor",
+      "icon": "/assets/capabilities/at_home.svg"
+    },
+    "last_seen": {
+      "type": "string",
+      "title": {
+        "en": "Last Seen",
+        "no": "Sist sett"
+      },
+      "desc": {
+        "en": "Timestamp of when the device was last detected on the network.",
+        "no": "Tidspunkt for når enheten sist ble registrert på nettverket."
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capabilities/last_seen.svg"
+    }
+  }
 }
