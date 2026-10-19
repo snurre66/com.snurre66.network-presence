@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 16px;
+      color: #333;
+      margin: 0;
+      background: #fafafa;
+    }
+    .header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    h2 {
+      font-size: 20px;
+      margin: 0 0 8px 0;
+      font-weight: 600;
+      color: #111;
+    }
+    p {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+      line-height: 1.4;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+      border: 1px solid #ebebeb;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    select {
+      width: 100%;
+      height: 48px;
+      padding: 0 12px;
+      font-size: 16px;
+      color: #222;
+      border: 1.5px solid #dcdcdc;
+      border-radius: 8px;
+      background: #fff;
+      outline: none;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%23666" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    select:focus {
+      border-color: #1E88E5;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      height: 48px;
+      line-height: 48px;
+      background: #1E88E5;
+      color: #fff;
+      text-align: center;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-sizing: border-box;
+      box-shadow: 0 2px 6px rgba(30,136,229,0.3);
+    }
+    .btn:active {
+      background: #1565C0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Hvem tilhører telefonen?</h2>
+    <p>Velg hvilken person denne telefonen skal knyttes til for automatisk tilstedeværelse.</p>
+  </div>
+
+  <div class="card">
+    <label for="userSelect">Registrert Homey-person</label>
+    <select id="userSelect">
+      <option value="none">-- Ikke tilknytt person --</option>
+      <option value="aed2c21c-c3a8-43f0-b446-d4d2d558ad07">Thomas Veivåg</option>
+      <option value="95dcd577-8e6d-4a55-9898-b2b7d5351ccb">Marta-Kristine Ognøy</option>
+      <option value="17081d71-f69d-4205-91b0-b123a01dd41a">Emilie Veivåg</option>
+      <option value="e46751f2-20c2-45a4-90f1-43cee4808a2b">Mariell Veivåg</option>
+    </select>
+  </div>
+
+  <button class="btn" id="submitBtn">Fortsett til paring</button>
+
+  <script type="application/javascript">
+    document.getElementById('submitBtn').addEventListener('click', function() {
+      var select = document.getElementById('userSelect');
+      var val = select.value;
+      var name = select.options[select.selectedIndex].text;
+
+      Homey.emit('set_selected_user', { userId: val, userName: name }, function(err) {
+        if (err) {
+          return Homey.alert(err.message || err);
+        }
+        Homey.nextView();
+      });
+    });
+  </script>
+</body>
+</html>

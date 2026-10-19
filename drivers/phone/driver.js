@@ -8,11 +8,31 @@ class PhoneDriver extends Homey.Driver {
     this.log('Phone / Person driver initialized.');
   }
 
-  /**
-   * Called during device pairing when the list_devices template is displayed.
-   * Performs an automated network scan to show all discovered devices,
-   * with a manual entry option at the top.
-   */
+  async onPair(session) {
+    let selectedUser = { userId: 'none', userName: '' };
+
+    session.setHandler('list_devices', async () => {
+      return this.onPairListDevices();
+    });
+
+    session.setHandler('set_selected_user', async (data) => {
+      this.log('User selected during pairing:', data);
+      selectedUser = data || { userId: 'none', userName: '' };
+      return true;
+    });
+
+    session.setHandler('add_device', async (device) => {
+      if (selectedUser && selectedUser.userId && selectedUser.userId !== 'none') {
+        device.settings = device.settings || {};
+        device.settings.homey_user = selectedUser.userId;
+        if (selectedUser.userName && !device.name.includes(selectedUser.userName)) {
+          device.name = selectedUser.userName;
+        }
+      }
+      return device;
+    });
+  }
+
   async onPairListDevices() {
     this.log('Scanning network for devices during pairing...');
     const resultList = [];
@@ -24,7 +44,8 @@ class PhoneDriver extends Homey.Driver {
       settings: {
         ip: '192.168.68.',
         hostname: '',
-        mac: ''
+        mac: '',
+        homey_user: 'none'
       }
     });
 
@@ -43,7 +64,8 @@ class PhoneDriver extends Homey.Driver {
             settings: {
               ip: dev.ip,
               hostname: dev.hostname || '',
-              mac: dev.mac || ''
+              mac: dev.mac || '',
+              homey_user: 'none'
             }
           });
         }

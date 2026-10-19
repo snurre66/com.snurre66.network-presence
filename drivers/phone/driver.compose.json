@@ -5,20 +5,13 @@
   },
   "class": "sensor",
   "capabilities": [
-    "alarm_presence",
-    "alarm_motion"
+    "alarm_presence"
   ],
   "capabilitiesOptions": {
     "alarm_presence": {
       "title": {
         "en": "Presence",
         "no": "Tilstedeværelse"
-      }
-    },
-    "alarm_motion": {
-      "title": {
-        "en": "Zone Activity",
-        "no": "Aktivitet i sone"
       }
     }
   },
@@ -31,6 +24,12 @@
     {
       "id": "list_devices",
       "template": "list_devices",
+      "navigation": {
+        "next": "select_user"
+      }
+    },
+    {
+      "id": "select_user",
       "navigation": {
         "next": "add_devices"
       }

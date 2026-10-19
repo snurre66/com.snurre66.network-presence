@@ -22,9 +22,6 @@ class PhoneDevice extends Homey.Device {
       this.isPresent = false;
       await this.setCapabilityValue('alarm_presence', false).catch(this.error);
     }
-    if (this.hasCapability('alarm_motion')) {
-      await this.setCapabilityValue('alarm_motion', this.isPresent).catch(this.error);
-    }
 
     this.lastSeenTime = this.isPresent ? Date.now() : 0;
     this.isProbing = false;
@@ -140,9 +137,6 @@ class PhoneDevice extends Homey.Device {
       this.isPresent = true;
 
       await this.setCapabilityValue('alarm_presence', true).catch(this.error);
-      if (this.hasCapability('alarm_motion')) {
-        await this.setCapabilityValue('alarm_motion', true).catch(this.error);
-      }
 
       if (this.homey.app && this.homey.app.triggerTurnedHome) {
         this.homey.app.triggerTurnedHome.trigger(this).catch(this.error);
@@ -198,9 +192,6 @@ class PhoneDevice extends Homey.Device {
       this.isPresent = false;
 
       await this.setCapabilityValue('alarm_presence', false).catch(this.error);
-      if (this.hasCapability('alarm_motion')) {
-        await this.setCapabilityValue('alarm_motion', false).catch(this.error);
-      }
 
       if (this.homey.app && this.homey.app.triggerTurnedAway) {
         this.homey.app.triggerTurnedAway.trigger(this).catch(this.error);
