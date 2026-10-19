@@ -126,30 +126,54 @@
       }
     },
     {
-      "id": "sync_homey_presence",
-      "type": "checkbox",
-      "value": false,
+      "id": "homey_user",
+      "type": "dropdown",
+      "value": "none",
       "label": {
-        "en": "Sync with Homey User Presence",
-        "no": "Synkroniser med Homey brukerstatus"
+        "en": "Homey Person",
+        "no": "Homey-person"
       },
       "hint": {
-        "en": "Automatically mark a Homey user as home or away",
-        "no": "Sett en Homey-bruker automatisk som hjemme eller borte"
-      }
-    },
-    {
-      "id": "homey_user_name",
-      "type": "text",
-      "value": "",
-      "label": {
-        "en": "Homey User Name / Email",
-        "no": "Homey Brukernavn / E-post"
+        "en": "Select which registered Homey person this phone belongs to",
+        "no": "Velg hvilken registrert person i Homey denne telefonen tilhører"
       },
-      "hint": {
-        "en": "Optional: Exact name or email of the Homey user to synchronize",
-        "no": "Valgfritt: Nøyaktig navn eller e-post til Homey-brukeren som skal synkroniseres"
-      }
+      "values": [
+        {
+          "id": "none",
+          "label": {
+            "en": "-- Do not sync --",
+            "no": "-- Ikke synkroniser --"
+          }
+        },
+        {
+          "id": "aed2c21c-c3a8-43f0-b446-d4d2d558ad07",
+          "label": {
+            "en": "Thomas Veivåg",
+            "no": "Thomas Veivåg"
+          }
+        },
+        {
+          "id": "95dcd577-8e6d-4a55-9898-b2b7d5351ccb",
+          "label": {
+            "en": "Marta-Kristine Ognøy",
+            "no": "Marta-Kristine Ognøy"
+          }
+        },
+        {
+          "id": "17081d71-f69d-4205-91b0-b123a01dd41a",
+          "label": {
+            "en": "Emilie Veivåg",
+            "no": "Emilie Veivåg"
+          }
+        },
+        {
+          "id": "e46751f2-20c2-45a4-90f1-43cee4808a2b",
+          "label": {
+            "en": "Mariell Veivåg",
+            "no": "Mariell Veivåg"
+          }
+        }
+      ]
     }
   ]
 }

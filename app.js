@@ -5,7 +5,7 @@ const mDNSTracker = require('./lib/mDNSTracker');
 
 class NetworkPresenceApp extends Homey.App {
   async onInit() {
-    this.log('Network Presence App is starting...');
+    this.log('Keys on this.homey:', Object.keys(this.homey).filter(k => !k.startsWith('_')));
 
     // Initialize shared mDNS tracker for Bonjour announcements
     this.mdnsTracker = new mDNSTracker(this);

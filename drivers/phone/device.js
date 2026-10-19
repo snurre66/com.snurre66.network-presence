@@ -2,6 +2,8 @@
 
 const Homey = require('homey');
 const ProbeEngine = require('../../lib/ProbeEngine');
+const ArpHelper = require('../../lib/ArpHelper');
+const NetworkScanner = require('../../lib/NetworkScanner');
 
 class PhoneDevice extends Homey.Device {
   async onInit() {
@@ -12,10 +14,9 @@ class PhoneDevice extends Homey.Device {
     this.hostname = (this.settings.hostname || '').trim().toLowerCase();
     this.mac = (this.settings.mac || '').trim().toLowerCase();
     this.awayDelayMinutes = Number(this.settings.away_delay) || 10;
-    this.probeIntervalSec = Number(this.settings.probe_interval) || 15;
     this.tcpPorts = this._parsePorts(this.settings.tcp_ports);
 
-    // Initial state
+    // Initial presence state
     this.isPresent = this.getCapabilityValue('alarm_presence');
     if (typeof this.isPresent !== 'boolean') {
       this.isPresent = false;
@@ -31,17 +32,10 @@ class PhoneDevice extends Homey.Device {
     // Attach to shared mDNS tracker
     this._setupmDNSListener();
 
-    // Start proactive polling loop
-    this._startPollingLoop();
-
-    // Trigger initial probe immediately
-    this.forceProbe().catch(this.error);
+    // Start adaptive polling loop (30s when Home, 10s when Away)
+    this._scheduleNextPoll(1000); // initial check after 1 second
   }
 
-  /**
-   * Parse comma-separated port string into array of numbers.
-   * @private
-   */
   _parsePorts(portsString) {
     if (!portsString) return [62078, 5353, 80, 443];
     return portsString
@@ -50,17 +44,11 @@ class PhoneDevice extends Homey.Device {
       .filter((p) => !isNaN(p) && p > 0 && p <= 65535);
   }
 
-  /**
-   * Listen for mDNS announcements from the shared mDNSTracker.
-   * @private
-   */
   _setupmDNSListener() {
     if (!this.homey.app || !this.homey.app.mdnsTracker) return;
 
     this.onDeviceSeen = ({ hostname, ip }) => {
       const cleanHost = (hostname || '').toLowerCase();
-
-      // Check if hostname matches
       if (this.hostname && cleanHost === this.hostname) {
         if (ip && ip !== this.currentIP) {
           this.log(`IP changed for hostname ${this.hostname}: ${this.currentIP} -> ${ip}`);
@@ -71,8 +59,11 @@ class PhoneDevice extends Homey.Device {
         return;
       }
 
-      // Check if IP matches
       if (this.currentIP && ip === this.currentIP) {
+        if (!this.hostname && hostname) {
+          this.hostname = cleanHost;
+          this.setSettings({ hostname: cleanHost }).catch(this.error);
+        }
         this.onDeviceDetected('mdns_ip_match');
       }
     };
@@ -87,56 +78,46 @@ class PhoneDevice extends Homey.Device {
     this.homey.app.mdnsTracker.on('ip_traffic', this.onIPTraffic);
   }
 
-  /**
-   * Start interval polling.
-   * @private
-   */
-  _startPollingLoop() {
-    this._stopPollingLoop();
-    const intervalMs = Math.max(5000, this.probeIntervalSec * 1000);
+  _scheduleNextPoll(delayMs = null) {
+    this._clearPollTimer();
 
-    this.pollInterval = this.homey.setInterval(() => {
-      this._pollCycle().catch((err) => {
-        this.error('Error during poll cycle:', err);
-      });
-    }, intervalMs);
+    let ms = delayMs;
+    if (ms === null) {
+      ms = this.isPresent ? 30000 : 10000;
+    }
+
+    this.pollTimer = this.homey.setTimeout(() => {
+      this._pollCycle()
+        .catch((err) => this.error('Error in poll cycle:', err))
+        .finally(() => {
+          this._scheduleNextPoll();
+        });
+    }, ms);
   }
 
-  /**
-   * Stop interval polling.
-   * @private
-   */
-  _stopPollingLoop() {
-    if (this.pollInterval) {
-      this.homey.clearInterval(this.pollInterval);
-      this.pollInterval = null;
+  _clearPollTimer() {
+    if (this.pollTimer) {
+      this.homey.clearTimeout(this.pollTimer);
+      this.pollTimer = null;
     }
   }
 
-  /**
-   * Single probe cycle.
-   * @private
-   */
   async _pollCycle() {
     if (this.isProbing) return;
     this.isProbing = true;
 
     try {
-      // If hostname is configured but IP is missing or needs resolving, check mDNS cache
       if (this.hostname && this.homey.app && this.homey.app.mdnsTracker) {
         const resolvedIP = this.homey.app.mdnsTracker.resolveIP(this.hostname);
         if (resolvedIP && resolvedIP !== this.currentIP) {
-          this.log(`Resolved hostname ${this.hostname} to new IP ${resolvedIP}`);
           this.currentIP = resolvedIP;
           this.setSettings({ ip: resolvedIP }).catch(this.error);
         }
       }
 
-      if (!this.currentIP) {
-        return;
-      }
+      if (!this.currentIP) return;
 
-      const probeResult = await ProbeEngine.probeDevice(this.currentIP, this.tcpPorts, 1200);
+      const probeResult = await ProbeEngine.probeDevice(this.currentIP, this.tcpPorts, 1000);
 
       if (probeResult.online) {
         await this.onDeviceDetected(`probe_${probeResult.reason}`);
@@ -148,11 +129,11 @@ class PhoneDevice extends Homey.Device {
     }
   }
 
-  /**
-   * Called whenever the device is confirmed active on the network.
-   */
   async onDeviceDetected(source = 'unknown') {
     this.lastSeenTime = Date.now();
+
+    // Automatically enrich missing fields (MAC address and hostname) in background
+    this._enrichMissingFields().catch(this.error);
 
     if (!this.isPresent) {
       this.log(`Presence transition: AWAY -> HOME (source: ${source}, ip: ${this.currentIP})`);
@@ -163,20 +144,49 @@ class PhoneDevice extends Homey.Device {
         await this.setCapabilityValue('alarm_motion', true).catch(this.error);
       }
 
-      // Fire Flow trigger
       if (this.homey.app && this.homey.app.triggerTurnedHome) {
         this.homey.app.triggerTurnedHome.trigger(this).catch(this.error);
       }
 
-      // Sync with Homey user presence if enabled
       this._syncHomeyPresence(true).catch(this.error);
     }
   }
 
   /**
-   * Evaluates how long the device has been silent and transitions to Away if grace period exceeded.
+   * Automatically detect and save missing MAC and hostname without manual input.
    * @private
    */
+  async _enrichMissingFields() {
+    const updates = {};
+
+    // 1. Check ARP cache for missing MAC
+    if (!this.mac && this.currentIP) {
+      const arpTable = ArpHelper.getArpTable();
+      const foundMac = arpTable.get(this.currentIP);
+      if (foundMac) {
+        this.mac = foundMac;
+        updates.mac = foundMac;
+        this.log(`Auto-discovered MAC address for ${this.currentIP}: ${foundMac}`);
+      }
+    }
+
+    // 2. Check reverse DNS or mDNS cache for missing hostname
+    if (!this.hostname && this.currentIP) {
+      const host = await NetworkScanner.reverseDNS(this.currentIP).catch(() => null);
+      if (host) {
+        this.hostname = host.toLowerCase();
+        updates.hostname = host;
+        this.log(`Auto-discovered hostname for ${this.currentIP}: ${host}`);
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await this.setSettings(updates).catch((err) => {
+        this.error('Could not save auto-discovered settings:', err.message);
+      });
+    }
+  }
+
   async _evaluateAbsence() {
     if (!this.isPresent) return;
 
@@ -184,7 +194,7 @@ class PhoneDevice extends Homey.Device {
     const graceMs = this.awayDelayMinutes * 60 * 1000;
 
     if (silentMs >= graceMs) {
-      this.log(`Presence transition: HOME -> AWAY (silent for ${Math.round(silentMs / 1000)}s, threshold: ${graceMs / 1000}s)`);
+      this.log(`Presence transition: HOME -> AWAY (silent for ${Math.round(silentMs / 1000)}s)`);
       this.isPresent = false;
 
       await this.setCapabilityValue('alarm_presence', false).catch(this.error);
@@ -192,90 +202,62 @@ class PhoneDevice extends Homey.Device {
         await this.setCapabilityValue('alarm_motion', false).catch(this.error);
       }
 
-      // Fire Flow trigger
       if (this.homey.app && this.homey.app.triggerTurnedAway) {
         this.homey.app.triggerTurnedAway.trigger(this).catch(this.error);
       }
 
-      // Sync with Homey user presence if enabled
       this._syncHomeyPresence(false).catch(this.error);
     }
   }
 
-  /**
-   * Synchronize with Homey's built-in presence manager.
-   * @private
-   */
   async _syncHomeyPresence(present) {
-    if (!this.settings.sync_homey_presence) return;
+    const userId = this.settings.homey_user;
+    if (!userId || userId === 'none') return;
 
     try {
       if (this.homey.presence && typeof this.homey.presence.setPresent === 'function') {
-        const targetUser = this.settings.homey_user_name;
         if (present) {
-          await this.homey.presence.setPresent(targetUser ? { user: targetUser } : {});
+          await this.homey.presence.setPresent({ user: userId });
         } else {
-          await this.homey.presence.setAway(targetUser ? { user: targetUser } : {});
+          await this.homey.presence.setAway({ user: userId });
         }
-        this.log(`Homey global user presence synchronized to ${present ? 'PRESENT' : 'AWAY'}`);
+        this.log(`Homey presence synced for user ${userId} to ${present ? 'HOME' : 'AWAY'}`);
       }
     } catch (err) {
-      this.error('Could not synchronize Homey user presence:', err.message);
+      this.error('Could not sync user presence:', err.message);
     }
   }
 
-  /**
-   * Condition check for Flow cards.
-   */
   isCurrentlyPresent() {
     return this.isPresent;
   }
 
-  /**
-   * Force an immediate check (triggered by Flow action or manually).
-   */
   async forceProbe() {
-    this.log(`Forced presence probe requested for ${this.getName()} (${this.currentIP})`);
     await this._pollCycle();
     return this.isPresent;
   }
 
   async onSettings({ oldSettings, newSettings, changedKeys }) {
-    this.log('Settings changed:', changedKeys);
     this.settings = newSettings;
+    if (changedKeys.includes('ip')) this.currentIP = (newSettings.ip || '').trim();
+    if (changedKeys.includes('hostname')) this.hostname = (newSettings.hostname || '').trim().toLowerCase();
+    if (changedKeys.includes('mac')) this.mac = (newSettings.mac || '').trim().toLowerCase();
+    if (changedKeys.includes('away_delay')) this.awayDelayMinutes = Number(newSettings.away_delay) || 10;
+    if (changedKeys.includes('tcp_ports')) this.tcpPorts = this._parsePorts(newSettings.tcp_ports);
 
-    if (changedKeys.includes('ip')) {
-      this.currentIP = (newSettings.ip || '').trim();
-    }
-    if (changedKeys.includes('hostname')) {
-      this.hostname = (newSettings.hostname || '').trim().toLowerCase();
-    }
-    if (changedKeys.includes('mac')) {
-      this.mac = (newSettings.mac || '').trim().toLowerCase();
-    }
-    if (changedKeys.includes('away_delay')) {
-      this.awayDelayMinutes = Number(newSettings.away_delay) || 10;
-    }
-    if (changedKeys.includes('tcp_ports')) {
-      this.tcpPorts = this._parsePorts(newSettings.tcp_ports);
-    }
-    if (changedKeys.includes('probe_interval')) {
-      this.probeIntervalSec = Number(newSettings.probe_interval) || 15;
-      this._startPollingLoop();
+    // If MAC or hostname were missing, attempt immediate enrichment
+    if (!this.mac || !this.hostname) {
+      this._enrichMissingFields().catch(this.error);
     }
   }
 
   async onDeleted() {
     this.log(`Device deleted: ${this.getName()}`);
-    this._stopPollingLoop();
+    this._clearPollTimer();
 
     if (this.homey.app && this.homey.app.mdnsTracker) {
-      if (this.onDeviceSeen) {
-        this.homey.app.mdnsTracker.removeListener('device_seen', this.onDeviceSeen);
-      }
-      if (this.onIPTraffic) {
-        this.homey.app.mdnsTracker.removeListener('ip_traffic', this.onIPTraffic);
-      }
+      if (this.onDeviceSeen) this.homey.app.mdnsTracker.removeListener('device_seen', this.onDeviceSeen);
+      if (this.onIPTraffic) this.homey.app.mdnsTracker.removeListener('ip_traffic', this.onIPTraffic);
     }
   }
 }

@@ -1,0 +1,8 @@
+# Ignore development and build artifacts from Homey App package
+node_modules/
+package-lock.json
+.git/
+.gitignore
+.homeybuild/
+.homeycompose/
+README.md

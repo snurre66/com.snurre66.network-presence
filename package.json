@@ -1,6 +1,6 @@
 {
   "name": "com.snurre66.network-presence",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Robust network presence detection for Homey Pro without any phone app.",
   "main": "app.js",
   "scripts": {
@@ -12,7 +12,8 @@
   },
   "author": "snurre66 <48808867+snurre66@users.noreply.github.com>",
   "license": "GPL-3.0-or-later",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "homey": "^3.0.0"
   }
 }
