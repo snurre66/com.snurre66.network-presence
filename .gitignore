@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Homey build artifacts
+.homeybuild/
+.homeyplugins/
+
+# Environment and secrets
+.env
+.secret.json
+
+# System files
+.DS_Store
+Thumbs.db

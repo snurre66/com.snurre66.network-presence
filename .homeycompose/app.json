@@ -1,0 +1,27 @@
+{
+  "id": "com.snurre66.network-presence",
+  "version": "1.0.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "brandColor": "#1E88E5",
+  "name": {
+    "en": "Network Presence",
+    "no": "Nettverk Tilstedeværelse"
+  },
+  "description": {
+    "en": "Robust network presence detection for Homey Pro without requiring any app on your phone.",
+    "no": "Robust tilstedeværelsesdeteksjon for Homey Pro basert på lokalnettverk uten behov for app på telefonen."
+  },
+  "category": [
+    "tools"
+  ],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "snurre66",
+    "email": "48808867+snurre66@users.noreply.github.com"
+  }
+}

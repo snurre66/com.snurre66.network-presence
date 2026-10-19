@@ -1,0 +1,36 @@
+{
+  "triggers": [
+    {
+      "id": "turned_home",
+      "title": {
+        "en": "Came home",
+        "no": "Kom hjem"
+      }
+    },
+    {
+      "id": "turned_away",
+      "title": {
+        "en": "Left home",
+        "no": "Forlot hjemmet"
+      }
+    }
+  ],
+  "conditions": [
+    {
+      "id": "is_home",
+      "title": {
+        "en": "Is !{{at home|away}}",
+        "no": "Er !{{hjemme|borte}}"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "force_probe",
+      "title": {
+        "en": "Force presence check",
+        "no": "Tving tilstedeværelsessjekk"
+      }
+    }
+  ]
+}

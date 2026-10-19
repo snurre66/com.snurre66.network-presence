@@ -1,0 +1,250 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.snurre66.network-presence",
+  "version": "1.0.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "brandColor": "#1E88E5",
+  "name": {
+    "en": "Network Presence",
+    "no": "Nettverk Tilstedeværelse"
+  },
+  "description": {
+    "en": "Robust network presence detection for Homey Pro without requiring any app on your phone.",
+    "no": "Robust tilstedeværelsesdeteksjon for Homey Pro basert på lokalnettverk uten behov for app på telefonen."
+  },
+  "category": [
+    "tools"
+  ],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "snurre66",
+    "email": "48808867+snurre66@users.noreply.github.com"
+  },
+  "flow": {
+    "triggers": [
+      {
+        "id": "turned_home",
+        "title": {
+          "en": "Came home",
+          "no": "Kom hjem"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=phone"
+          }
+        ]
+      },
+      {
+        "id": "turned_away",
+        "title": {
+          "en": "Left home",
+          "no": "Forlot hjemmet"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=phone"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "is_home",
+        "title": {
+          "en": "Is !{{at home|away}}",
+          "no": "Er !{{hjemme|borte}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=phone"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "force_probe",
+        "title": {
+          "en": "Force presence check",
+          "no": "Tving tilstedeværelsessjekk"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=phone"
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Phone / Person",
+        "no": "Telefon / Person"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "alarm_presence",
+        "alarm_motion"
+      ],
+      "capabilitiesOptions": {
+        "alarm_presence": {
+          "title": {
+            "en": "Presence",
+            "no": "Tilstedeværelse"
+          }
+        },
+        "alarm_motion": {
+          "title": {
+            "en": "Zone Activity",
+            "no": "Aktivitet i sone"
+          }
+        }
+      },
+      "images": {
+        "small": "/drivers/phone/assets/images/small.png",
+        "large": "/drivers/phone/assets/images/large.png",
+        "xlarge": "/drivers/phone/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "id": "ip",
+          "type": "text",
+          "label": {
+            "en": "IP Address",
+            "no": "IP-adresse"
+          },
+          "value": "",
+          "hint": {
+            "en": "Current IP address of the device (e.g. 192.168.68.75)",
+            "no": "Nåværende IP-adresse til telefonen (f.eks. 192.168.68.75)"
+          }
+        },
+        {
+          "id": "hostname",
+          "type": "text",
+          "label": {
+            "en": "mDNS / Bonjour Hostname",
+            "no": "mDNS / Bonjour Vertsnavn"
+          },
+          "value": "",
+          "hint": {
+            "en": "Local hostname ending in .local (e.g. Thomas-iPhone.local). Allows automatic tracking if IP changes.",
+            "no": "Lokalt vertsnavn som slutter på .local (f.eks. Thomas-iPhone.local). Tillater automatisk gjenkjenning dersom IP endres."
+          }
+        },
+        {
+          "id": "mac",
+          "type": "text",
+          "label": {
+            "en": "MAC Address",
+            "no": "MAC-adresse"
+          },
+          "value": "",
+          "hint": {
+            "en": "MAC address of the device (e.g. 20:23:51:49:35:90)",
+            "no": "MAC-adressen til telefonen (f.eks. 20:23:51:49:35:90)"
+          }
+        },
+        {
+          "id": "away_delay",
+          "type": "number",
+          "min": 1,
+          "max": 60,
+          "step": 1,
+          "value": 10,
+          "label": {
+            "en": "Away Grace Period (minutes)",
+            "no": "Forsinkelse før borte (minutter)"
+          },
+          "hint": {
+            "en": "Minutes of silence before marking as away (standard 10 min avoids false triggers while the phone sleeps)",
+            "no": "Minutter uten kontakt før status settes til borte (standard 10 min unngår falske alarmer når telefonen sover i lommen)"
+          }
+        },
+        {
+          "id": "probe_interval",
+          "type": "number",
+          "min": 5,
+          "max": 120,
+          "step": 5,
+          "value": 15,
+          "label": {
+            "en": "Probe Interval (seconds)",
+            "no": "Sonderingsintervall (sekunder)"
+          },
+          "hint": {
+            "en": "Interval between network probes when at home (default: 15s)",
+            "no": "Tidsintervall mellom hver nettverkssjekk når personen er hjemme (standard: 15 sek)"
+          }
+        },
+        {
+          "id": "tcp_ports",
+          "type": "text",
+          "value": "62078,5353,80,443",
+          "label": {
+            "en": "Probe Ports (TCP)",
+            "no": "Sonderingsporter (TCP)"
+          },
+          "hint": {
+            "en": "Comma-separated TCP ports to probe (62078 for iOS, 5353 mDNS, 80 HTTP, 443 HTTPS)",
+            "no": "Kommaseparerte TCP-porter (62078 for iOS, 5353 mDNS, 80 HTTP, 443 HTTPS)"
+          }
+        },
+        {
+          "id": "sync_homey_presence",
+          "type": "checkbox",
+          "value": false,
+          "label": {
+            "en": "Sync with Homey User Presence",
+            "no": "Synkroniser med Homey brukerstatus"
+          },
+          "hint": {
+            "en": "Automatically mark a Homey user as home or away",
+            "no": "Sett en Homey-bruker automatisk som hjemme eller borte"
+          }
+        },
+        {
+          "id": "homey_user_name",
+          "type": "text",
+          "value": "",
+          "label": {
+            "en": "Homey User Name / Email",
+            "no": "Homey Brukernavn / E-post"
+          },
+          "hint": {
+            "en": "Optional: Exact name or email of the Homey user to synchronize",
+            "no": "Valgfritt: Nøyaktig navn eller e-post til Homey-brukeren som skal synkroniseres"
+          }
+        }
+      ],
+      "id": "phone"
+    }
+  ]
+}
