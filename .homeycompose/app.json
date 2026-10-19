@@ -1,6 +1,6 @@
 {
   "id": "com.snurre66.network-presence",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "brandColor": "#1E88E5",
