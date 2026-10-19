@@ -114,14 +114,14 @@
       },
       "pair": [
         {
-          "id": "list_devices",
-          "template": "list_devices",
+          "id": "select_user",
           "navigation": {
-            "next": "select_user"
+            "next": "list_devices"
           }
         },
         {
-          "id": "select_user",
+          "id": "list_devices",
+          "template": "list_devices",
           "navigation": {
             "next": "add_devices"
           }

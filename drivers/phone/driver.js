@@ -11,41 +11,31 @@ class PhoneDriver extends Homey.Driver {
   async onPair(session) {
     let selectedUser = { userId: 'none', userName: '' };
 
-    session.setHandler('list_devices', async () => {
-      return this.onPairListDevices();
-    });
-
     session.setHandler('set_selected_user', async (data) => {
-      this.log('User selected during pairing:', data);
+      this.log('User selected in step 1:', data);
       selectedUser = data || { userId: 'none', userName: '' };
       return true;
     });
 
-    session.setHandler('add_device', async (device) => {
-      if (selectedUser && selectedUser.userId && selectedUser.userId !== 'none') {
-        device.settings = device.settings || {};
-        device.settings.homey_user = selectedUser.userId;
-        if (selectedUser.userName && !device.name.includes(selectedUser.userName)) {
-          device.name = selectedUser.userName;
-        }
-      }
-      return device;
+    session.setHandler('list_devices', async () => {
+      return this.onPairListDevices(selectedUser);
     });
   }
 
-  async onPairListDevices() {
-    this.log('Scanning network for devices during pairing...');
+  async onPairListDevices(selectedUser = { userId: 'none', userName: '' }) {
+    this.log('Scanning network for devices during pairing, assigned to user:', selectedUser);
     const resultList = [];
+    const userId = (selectedUser && selectedUser.userId) ? selectedUser.userId : 'none';
+    const userName = (selectedUser && selectedUser.userName && selectedUser.userId !== 'none') ? selectedUser.userName : '';
 
     // Always offer manual IP entry as the first choice
     resultList.push({
-      name: '➕ Skriv inn IP manuelt',
+      name: userName ? `➕ ${userName} (Skriv inn IP)` : '➕ Skriv inn IP manuelt',
       data: { id: `manual_${Date.now()}` },
       settings: {
         ip: '192.168.68.',
         hostname: '',
-        mac: '',
-        homey_user: 'none'
+        homey_user: userId
       }
     });
 
@@ -56,16 +46,17 @@ class PhoneDriver extends Homey.Driver {
       if (discovered && discovered.length > 0) {
         for (const dev of discovered) {
           const idSafe = dev.ip ? dev.ip.replace(/[^a-zA-Z0-9]/g, '_') : `dev_${Date.now()}`;
+          const lastOctet = dev.ip ? dev.ip.split('.').pop() : '';
+          const displayName = userName ? `📱 ${userName} (.${lastOctet})` : dev.name;
           resultList.push({
-            name: dev.name,
+            name: displayName,
             data: {
               id: `phone_${idSafe}_${Date.now()}`
             },
             settings: {
               ip: dev.ip,
               hostname: dev.hostname || '',
-              mac: dev.mac || '',
-              homey_user: 'none'
+              homey_user: userId
             }
           });
         }
