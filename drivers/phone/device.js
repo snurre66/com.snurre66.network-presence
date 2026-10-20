@@ -33,7 +33,8 @@ class PhoneDevice extends Homey.Device {
     }
 
     if (this.getCapabilityValue('last_seen') === null) {
-      await this.setCapabilityValue('last_seen', 'Venter på første sjekk...').catch(this.error);
+      const initText = this._isNorwegian() ? 'Venter på første sjekk...' : 'Waiting for probe...';
+      await this.setCapabilityValue('last_seen', initText).catch(this.error);
     }
 
     this.lastSeenTime = this.isPresent ? Date.now() : 0;
@@ -146,8 +147,8 @@ class PhoneDevice extends Homey.Device {
     // Auto-detect hostname if missing
     this._enrichMissingFields().catch(this.error);
 
-    const timeStr = new Date(now).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' });
-    await this.setCapabilityValue('last_seen', `I dag kl. ${timeStr}`).catch(this.error);
+    const lastSeenText = this._formatLastSeen(now, false);
+    await this.setCapabilityValue('last_seen', lastSeenText).catch(this.error);
 
     if (!this.isPresent) {
       this.log(`Presence transition: AWAY -> HOME (source: ${source}, ip: ${this.currentIP})`);
@@ -184,10 +185,7 @@ class PhoneDevice extends Homey.Device {
 
       await this.setCapabilityValue('at_home', false).catch(this.error);
 
-      const timeStr = this.lastSeenTime
-        ? new Date(this.lastSeenTime).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })
-        : '';
-      const lastSeenText = timeStr ? `Borte (sist sett ${timeStr})` : 'Borte';
+      const lastSeenText = this._formatLastSeen(this.lastSeenTime, true);
       await this.setCapabilityValue('last_seen', lastSeenText).catch(this.error);
 
       if (this.homey.app && this.homey.app.triggerTurnedAway) {
@@ -213,6 +211,62 @@ class PhoneDevice extends Homey.Device {
     if (changedKeys.includes('tcp_ports')) this.tcpPorts = this._parsePorts(newSettings.tcp_ports);
 
 
+  }
+
+  _isNorwegian() {
+    try {
+      const lang = (this.homey.i18n && typeof this.homey.i18n.getLanguage === 'function')
+        ? this.homey.i18n.getLanguage()
+        : 'no';
+      return lang === 'no' || lang === 'nb' || lang === 'nn';
+    } catch {
+      return true;
+    }
+  }
+
+  _formatLastSeen(timestamp, isAway = false) {
+    if (!timestamp) return isAway ? (this._isNorwegian() ? 'Borte' : 'Away') : '';
+    try {
+      const timeZone = (this.homey.clock && typeof this.homey.clock.getTimezone === 'function')
+        ? this.homey.clock.getTimezone()
+        : 'Europe/Oslo';
+
+      const isNo = this._isNorwegian();
+      const locale = isNo ? 'nb-NO' : 'en-US';
+
+      const date = new Date(timestamp);
+      const timeStr = date.toLocaleTimeString(locale, {
+        timeZone,
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const now = new Date();
+      const dateStr = date.toLocaleDateString('en-CA', { timeZone });
+      const nowStr = now.toLocaleDateString('en-CA', { timeZone });
+
+      let dayStr = '';
+      if (dateStr === nowStr) {
+        dayStr = isNo ? `I dag kl. ${timeStr}` : `Today at ${timeStr}`;
+      } else {
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const yestStr = yesterday.toLocaleDateString('en-CA', { timeZone });
+        if (dateStr === yestStr) {
+          dayStr = isNo ? `I går kl. ${timeStr}` : `Yesterday at ${timeStr}`;
+        } else {
+          const shortDate = date.toLocaleDateString(locale, { timeZone, day: 'numeric', month: 'short' });
+          dayStr = isNo ? `${shortDate} kl. ${timeStr}` : `${shortDate} at ${timeStr}`;
+        }
+      }
+
+      if (isAway) {
+        return isNo ? `Borte (${dayStr})` : `Away (${dayStr})`;
+      }
+      return dayStr;
+    } catch (err) {
+      this.error('Error formatting last seen timestamp:', err);
+      return new Date(timestamp).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' });
+    }
   }
 
   async onDeleted() {
