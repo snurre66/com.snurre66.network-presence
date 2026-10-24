@@ -1,0 +1,36 @@
+{
+  "triggers": [
+    {
+      "id": "guest_device_turned_home",
+      "title": {
+        "en": "Guest came home",
+        "no": "Gjest kom hjem"
+      }
+    },
+    {
+      "id": "guest_device_turned_away",
+      "title": {
+        "en": "Guest left home",
+        "no": "Gjest forlot hjemmet"
+      }
+    }
+  ],
+  "conditions": [
+    {
+      "id": "guest_device_is_home",
+      "title": {
+        "en": "Guest is !{{at home|away}}",
+        "no": "Gjest er !{{hjemme|borte}}"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "guest_device_force_probe",
+      "title": {
+        "en": "Force guest presence check",
+        "no": "Tving tilstedeværelsessjekk for gjest"
+      }
+    }
+  ]
+}

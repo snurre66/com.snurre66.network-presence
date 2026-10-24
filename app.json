@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.snurre66.network-presence",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "brandColor": "#1E88E5",
@@ -27,6 +27,78 @@
   },
   "flow": {
     "triggers": [
+      {
+        "title": {
+          "en": "A guest left",
+          "no": "En gjest dro"
+        },
+        "hint": {
+          "en": "Triggers when any guest device leaves Wi-Fi",
+          "no": "Trigges når en hvilken som helst gjeste-enhet forlater Wi-Fi"
+        },
+        "tokens": [
+          {
+            "name": "guest_name",
+            "type": "string",
+            "title": {
+              "en": "Guest Name",
+              "no": "Gjestens navn"
+            },
+            "example": "Bestemor"
+          }
+        ],
+        "id": "guest_turned_away"
+      },
+      {
+        "title": {
+          "en": "A guest arrived",
+          "no": "En gjest ankom"
+        },
+        "hint": {
+          "en": "Triggers when any guest device connects to Wi-Fi",
+          "no": "Trigges når en hvilken som helst gjeste-enhet kobler til Wi-Fi"
+        },
+        "tokens": [
+          {
+            "name": "guest_name",
+            "type": "string",
+            "title": {
+              "en": "Guest Name",
+              "no": "Gjestens navn"
+            },
+            "example": "Bestemor"
+          }
+        ],
+        "id": "guest_turned_home"
+      },
+      {
+        "id": "guest_device_turned_home",
+        "title": {
+          "en": "Guest came home",
+          "no": "Gjest kom hjem"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=guest"
+          }
+        ]
+      },
+      {
+        "id": "guest_device_turned_away",
+        "title": {
+          "en": "Guest left home",
+          "no": "Gjest forlot hjemmet"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=guest"
+          }
+        ]
+      },
       {
         "id": "turned_home",
         "title": {
@@ -58,6 +130,20 @@
     ],
     "conditions": [
       {
+        "id": "guest_device_is_home",
+        "title": {
+          "en": "Guest is !{{at home|away}}",
+          "no": "Gjest er !{{hjemme|borte}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=guest"
+          }
+        ]
+      },
+      {
         "id": "is_home",
         "title": {
           "en": "Is !{{at home|away}}",
@@ -73,6 +159,20 @@
       }
     ],
     "actions": [
+      {
+        "id": "guest_device_force_probe",
+        "title": {
+          "en": "Force guest presence check",
+          "no": "Tving tilstedeværelsessjekk for gjest"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=guest"
+          }
+        ]
+      },
       {
         "id": "force_probe",
         "title": {
@@ -90,6 +190,115 @@
     ]
   },
   "drivers": [
+    {
+      "name": {
+        "en": "Guest",
+        "no": "Gjest"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "at_home",
+        "last_seen"
+      ],
+      "capabilitiesOptions": {
+        "at_home": {
+          "title": {
+            "en": "At Home",
+            "no": "Hjemme"
+          }
+        },
+        "last_seen": {
+          "title": {
+            "en": "Last Seen",
+            "no": "Sist sett"
+          }
+        }
+      },
+      "images": {
+        "small": "/drivers/guest/assets/images/small.png",
+        "large": "/drivers/guest/assets/images/large.png",
+        "xlarge": "/drivers/guest/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "select_device"
+        }
+      ],
+      "settings": [
+        {
+          "id": "ip",
+          "type": "text",
+          "label": {
+            "en": "IP Address",
+            "no": "IP-adresse"
+          },
+          "value": "",
+          "hint": {
+            "en": "Current IP address of the guest's device (e.g. 192.168.68.85)",
+            "no": "Nåværende IP-adresse til gjestens telefon (f.eks. 192.168.68.85)"
+          }
+        },
+        {
+          "id": "hostname",
+          "type": "text",
+          "label": {
+            "en": "mDNS / Bonjour Hostname",
+            "no": "mDNS / Bonjour Vertsnavn"
+          },
+          "value": "",
+          "hint": {
+            "en": "Local hostname ending in .local (e.g. Bestemor-iPhone.local). Allows automatic tracking if IP changes.",
+            "no": "Lokalt vertsnavn som slutter på .local (f.eks. Bestemor-iPhone.local). Tillater automatisk gjenkjenning dersom IP endres."
+          }
+        },
+        {
+          "id": "away_delay",
+          "type": "number",
+          "min": 1,
+          "max": 60,
+          "step": 1,
+          "value": 5,
+          "label": {
+            "en": "Away Grace Period (minutes)",
+            "no": "Forsinkelse før borte (minutter)"
+          },
+          "hint": {
+            "en": "Minutes of silence before marking as away (standard 5 min for guests)",
+            "no": "Minutter uten kontakt før status settes til borte (standard 5 min for gjester)"
+          }
+        },
+        {
+          "id": "probe_interval",
+          "type": "number",
+          "min": 5,
+          "max": 120,
+          "step": 5,
+          "value": 15,
+          "label": {
+            "en": "Probe Interval (seconds)",
+            "no": "Sonderingsintervall (sekunder)"
+          },
+          "hint": {
+            "en": "Interval between network probes when at home (default: 15s)",
+            "no": "Tidsintervall mellom hver nettverkssjekk når gjesten er til stede (standard: 15 sek)"
+          }
+        },
+        {
+          "id": "tcp_ports",
+          "type": "text",
+          "value": "62078,5353,80,443",
+          "label": {
+            "en": "Probe Ports (TCP)",
+            "no": "Sonderingsporter (TCP)"
+          },
+          "hint": {
+            "en": "Comma-separated TCP ports to probe (62078 for iOS, 5353 mDNS, 80 HTTP, 443 HTTPS)",
+            "no": "Kommaseparerte TCP-porter (62078 for iOS, 5353 mDNS, 80 HTTP, 443 HTTPS)"
+          }
+        }
+      ],
+      "id": "guest"
+    },
     {
       "name": {
         "en": "Phone / Person",

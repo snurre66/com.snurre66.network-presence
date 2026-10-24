@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "A guest left",
+    "no": "En gjest dro"
+  },
+  "hint": {
+    "en": "Triggers when any guest device leaves Wi-Fi",
+    "no": "Trigges når en hvilken som helst gjeste-enhet forlater Wi-Fi"
+  },
+  "tokens": [
+    {
+      "name": "guest_name",
+      "type": "string",
+      "title": {
+        "en": "Guest Name",
+        "no": "Gjestens navn"
+      },
+      "example": "Bestemor"
+    }
+  ]
+}

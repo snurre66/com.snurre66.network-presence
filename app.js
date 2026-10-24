@@ -11,11 +11,15 @@ class NetworkPresenceApp extends Homey.App {
     this.mdnsTracker = new mDNSTracker(this);
     this.mdnsTracker.start();
 
-    // Register Flow triggers
+    // Register Phone Flow triggers
     this.triggerTurnedHome = this.homey.flow.getDeviceTriggerCard('turned_home');
     this.triggerTurnedAway = this.homey.flow.getDeviceTriggerCard('turned_away');
 
-    // Register Flow condition
+    // Register Guest App-level Flow triggers
+    this.triggerGuestTurnedHome = this.homey.flow.getTriggerCard('guest_turned_home');
+    this.triggerGuestTurnedAway = this.homey.flow.getTriggerCard('guest_turned_away');
+
+    // Register Flow conditions
     const conditionIsHome = this.homey.flow.getConditionCard('is_home');
     if (conditionIsHome) {
       conditionIsHome.registerRunListener(async (args) => {
@@ -23,10 +27,24 @@ class NetworkPresenceApp extends Homey.App {
       });
     }
 
-    // Register Flow action
+    const conditionGuestIsHome = this.homey.flow.getConditionCard('guest_device_is_home');
+    if (conditionGuestIsHome) {
+      conditionGuestIsHome.registerRunListener(async (args) => {
+        return args.device.isCurrentlyPresent();
+      });
+    }
+
+    // Register Flow actions
     const actionForceProbe = this.homey.flow.getActionCard('force_probe');
     if (actionForceProbe) {
       actionForceProbe.registerRunListener(async (args) => {
+        return args.device.forceProbe();
+      });
+    }
+
+    const actionGuestForceProbe = this.homey.flow.getActionCard('guest_device_force_probe');
+    if (actionGuestForceProbe) {
+      actionGuestForceProbe.registerRunListener(async (args) => {
         return args.device.forceProbe();
       });
     }

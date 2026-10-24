@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "A guest arrived",
+    "no": "En gjest ankom"
+  },
+  "hint": {
+    "en": "Triggers when any guest device connects to Wi-Fi",
+    "no": "Trigges når en hvilken som helst gjeste-enhet kobler til Wi-Fi"
+  },
+  "tokens": [
+    {
+      "name": "guest_name",
+      "type": "string",
+      "title": {
+        "en": "Guest Name",
+        "no": "Gjestens navn"
+      },
+      "example": "Bestemor"
+    }
+  ]
+}

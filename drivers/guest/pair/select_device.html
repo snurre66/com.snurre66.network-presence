@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 16px;
+      color: #333;
+      margin: 0;
+      background: #fafafa;
+      box-sizing: border-box;
+    }
+    .header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    h2 {
+      font-size: 20px;
+      margin: 0 0 6px 0;
+      font-weight: 600;
+      color: #111;
+    }
+    p {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+      line-height: 1.4;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+      border: 1px solid #ebebeb;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .input-field {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      box-sizing: border-box;
+      background: #fff;
+    }
+    .input-field:focus {
+      border-color: #007aff;
+    }
+    .submit-btn {
+      width: 100%;
+      height: 44px;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .submit-btn:active {
+      background: #0056b3;
+    }
+    .device-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .device-item {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid #e5e5e5;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .device-item:hover, .device-item:active {
+      border-color: #007aff;
+      background: #f0f7ff;
+    }
+    .device-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #eef4ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .device-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #007aff;
+    }
+    .device-info {
+      flex-grow: 1;
+      overflow: hidden;
+    }
+    .device-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .device-ip {
+      font-size: 12px;
+      color: #718096;
+      font-family: monospace;
+    }
+    .device-arrow {
+      color: #cbd5e0;
+      font-size: 18px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    .loader-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 0;
+      color: #718096;
+      font-size: 14px;
+    }
+    .spinner {
+      border: 3px solid rgba(0, 0, 0, 0.08);
+      border-top: 3px solid #007aff;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 12px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2 id="headerTitle">Legg til Gjest</h2>
+    <p id="headerSubtitle">Velg gjestens telefon fra nettverket eller skriv inn IP manuelt.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Manuell registrering</div>
+    <div class="form-group">
+      <label for="guestNameInput">Gjestens navn</label>
+      <input type="text" id="guestNameInput" class="input-field" placeholder="F.eks. Bestemor, Svigerfar, Snekker">
+    </div>
+    <div class="form-group">
+      <label for="manualIpInput">IP-adresse</label>
+      <input type="text" id="manualIpInput" class="input-field" placeholder="192.168.68.">
+    </div>
+    <button class="submit-btn" id="manualAddBtn">Legg til gjest</button>
+  </div>
+
+  <div class="card-title" style="padding: 0 4px;">Oppdagede enheter på Wi-Fi</div>
+
+  <div id="loader" class="loader-container">
+    <div class="spinner"></div>
+    <div>Søker etter enheter på nettverket...</div>
+  </div>
+
+  <div id="deviceList" class="device-list" style="display: none;"></div>
+
+  <script type="application/javascript">
+    var isSubmitting = false;
+
+    // Scan network for devices
+    Homey.emit('scan_network', function(err, devices) {
+      document.getElementById('loader').style.display = 'none';
+      var listContainer = document.getElementById('deviceList');
+      listContainer.style.display = 'flex';
+
+      if (err || !devices || devices.length === 0) {
+        listContainer.innerHTML = '<div style="text-align:center; padding:16px; color:#718096; font-size:14px;">Ingen telefoner oppdaget automatisk.<br>Skriv inn IP-adressen i feltet over.</div>';
+        return;
+      }
+
+      // Render discovered devices
+      devices.forEach(function(dev) {
+        var item = document.createElement('div');
+        item.className = 'device-item';
+
+        var displayName = dev.name || 'Ukjent enhet';
+        var lastOctet = dev.ip.split('.').pop();
+        if (/^IP\s\./i.test(displayName)) {
+          displayName = 'Nettverksenhet .' + lastOctet;
+        }
+
+        item.innerHTML =
+          '<div class="device-icon">' +
+            '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>' +
+          '</div>' +
+          '<div class="device-info">' +
+            '<div class="device-name">' + escapeHtml(displayName) + '</div>' +
+            '<div class="device-ip">IP: ' + escapeHtml(dev.ip) + '</div>' +
+          '</div>' +
+          '<div class="device-arrow">›</div>';
+
+        item.addEventListener('click', function() {
+          var inputName = (document.getElementById('guestNameInput').value || '').trim();
+          var finalName = inputName || displayName;
+          createAndAddDevice(dev.ip, dev.hostname, finalName);
+        });
+
+        listContainer.appendChild(item);
+      });
+    });
+
+    // Manual IP button
+    document.getElementById('manualAddBtn').addEventListener('click', function() {
+      var nameInput = document.getElementById('guestNameInput');
+      var ipInput = document.getElementById('manualIpInput');
+      var name = (nameInput.value || '').trim();
+      var ip = (ipInput.value || '').trim();
+
+      if (!ip || !/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+        return Homey.alert('Vennligst skriv inn en gyldig IP-adresse (f.eks. 192.168.68.85).');
+      }
+      createAndAddDevice(ip, '', name || ('Gjest .' + ip.split('.').pop()));
+    });
+
+    function createAndAddDevice(ip, hostname, guestName) {
+      if (isSubmitting) return;
+      isSubmitting = true;
+
+      var tileName = guestName || (hostname ? hostname.replace(/\.local$/i, '') : '') || ('Gjest .' + ip.split('.').pop());
+
+      var deviceData = {
+        name: tileName,
+        data: {
+          id: 'guest_' + ip.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now()
+        },
+        settings: {
+          ip: ip,
+          hostname: hostname || '',
+          away_delay: 5
+        }
+      };
+
+      document.getElementById('headerSubtitle').textContent = 'Oppretter gjeste-enhet "' + tileName + '"...';
+
+      Homey.createDevice(deviceData)
+        .then(function() {
+          Homey.done();
+        })
+        .catch(function(err) {
+          isSubmitting = false;
+          document.getElementById('headerSubtitle').textContent = 'Feil ved opprettelse.';
+          Homey.alert(err.message || err);
+        });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>

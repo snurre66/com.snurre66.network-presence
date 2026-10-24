@@ -1,0 +1,108 @@
+{
+  "name": {
+    "en": "Guest",
+    "no": "Gjest"
+  },
+  "class": "sensor",
+  "capabilities": [
+    "at_home",
+    "last_seen"
+  ],
+  "capabilitiesOptions": {
+    "at_home": {
+      "title": {
+        "en": "At Home",
+        "no": "Hjemme"
+      }
+    },
+    "last_seen": {
+      "title": {
+        "en": "Last Seen",
+        "no": "Sist sett"
+      }
+    }
+  },
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "select_device"
+    }
+  ],
+  "settings": [
+    {
+      "id": "ip",
+      "type": "text",
+      "label": {
+        "en": "IP Address",
+        "no": "IP-adresse"
+      },
+      "value": "",
+      "hint": {
+        "en": "Current IP address of the guest's device (e.g. 192.168.68.85)",
+        "no": "Nåværende IP-adresse til gjestens telefon (f.eks. 192.168.68.85)"
+      }
+    },
+    {
+      "id": "hostname",
+      "type": "text",
+      "label": {
+        "en": "mDNS / Bonjour Hostname",
+        "no": "mDNS / Bonjour Vertsnavn"
+      },
+      "value": "",
+      "hint": {
+        "en": "Local hostname ending in .local (e.g. Bestemor-iPhone.local). Allows automatic tracking if IP changes.",
+        "no": "Lokalt vertsnavn som slutter på .local (f.eks. Bestemor-iPhone.local). Tillater automatisk gjenkjenning dersom IP endres."
+      }
+    },
+    {
+      "id": "away_delay",
+      "type": "number",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "value": 5,
+      "label": {
+        "en": "Away Grace Period (minutes)",
+        "no": "Forsinkelse før borte (minutter)"
+      },
+      "hint": {
+        "en": "Minutes of silence before marking as away (standard 5 min for guests)",
+        "no": "Minutter uten kontakt før status settes til borte (standard 5 min for gjester)"
+      }
+    },
+    {
+      "id": "probe_interval",
+      "type": "number",
+      "min": 5,
+      "max": 120,
+      "step": 5,
+      "value": 15,
+      "label": {
+        "en": "Probe Interval (seconds)",
+        "no": "Sonderingsintervall (sekunder)"
+      },
+      "hint": {
+        "en": "Interval between network probes when at home (default: 15s)",
+        "no": "Tidsintervall mellom hver nettverkssjekk når gjesten er til stede (standard: 15 sek)"
+      }
+    },
+    {
+      "id": "tcp_ports",
+      "type": "text",
+      "value": "62078,5353,80,443",
+      "label": {
+        "en": "Probe Ports (TCP)",
+        "no": "Sonderingsporter (TCP)"
+      },
+      "hint": {
+        "en": "Comma-separated TCP ports to probe (62078 for iOS, 5353 mDNS, 80 HTTP, 443 HTTPS)",
+        "no": "Kommaseparerte TCP-porter (62078 for iOS, 5353 mDNS, 80 HTTP, 443 HTTPS)"
+      }
+    }
+  ]
+}
