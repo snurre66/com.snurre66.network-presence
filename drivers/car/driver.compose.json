@@ -1,0 +1,115 @@
+{
+  "name": {
+    "en": "Car / Vehicle",
+    "no": "Bil / Kjøretøy"
+  },
+  "class": "sensor",
+  "capabilities": [
+    "at_home",
+    "on_trip",
+    "last_seen"
+  ],
+  "capabilitiesOptions": {
+    "at_home": {
+      "title": {
+        "en": "Wi-Fi Connected",
+        "no": "Wi-Fi tilkoblet"
+      }
+    },
+    "on_trip": {
+      "title": {
+        "en": "On Trip",
+        "no": "På tur"
+      }
+    },
+    "last_seen": {
+      "title": {
+        "en": "Last Seen",
+        "no": "Sist sett"
+      }
+    }
+  },
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "select_device"
+    }
+  ],
+  "settings": [
+    {
+      "id": "ip",
+      "type": "text",
+      "label": {
+        "en": "IP Address",
+        "no": "IP-adresse"
+      },
+      "value": "",
+      "hint": {
+        "en": "Current IP address of the vehicle (e.g. 192.168.68.55)",
+        "no": "Nåværende IP-adresse til bilen (f.eks. 192.168.68.55)"
+      }
+    },
+    {
+      "id": "hostname",
+      "type": "text",
+      "label": {
+        "en": "mDNS / Bonjour Hostname",
+        "no": "mDNS / Bonjour Vertsnavn"
+      },
+      "value": "",
+      "hint": {
+        "en": "Local hostname ending in .local (e.g. Tesla-MY.local). Allows automatic tracking if IP changes.",
+        "no": "Lokalt vertsnavn som slutter på .local (f.eks. Tesla-MY.local). Tillater automatisk gjenkjenning dersom IP endres."
+      }
+    },
+    {
+      "id": "away_delay",
+      "type": "number",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "value": 2,
+      "label": {
+        "en": "Away Grace Period (minutes)",
+        "no": "Forsinkelse før borte (minutter)"
+      },
+      "hint": {
+        "en": "Minutes of silence before marking as away (recommended 2 min for vehicles)",
+        "no": "Minutter uten kontakt før status settes til borte (anbefalt 2 min for bil)"
+      }
+    },
+    {
+      "id": "probe_interval",
+      "type": "number",
+      "min": 5,
+      "max": 300,
+      "step": 5,
+      "value": 15,
+      "label": {
+        "en": "Polling Interval (seconds)",
+        "no": "Søkeintervall (sekunder)"
+      },
+      "hint": {
+        "en": "How often to ping the vehicle when absent (recommended 15s for fast arrival response)",
+        "no": "Hvor ofte bilen søkes opp når den er borte (anbefalt 15s for rask respons ved ankomst)"
+      }
+    },
+    {
+      "id": "tcp_ports",
+      "type": "text",
+      "value": "62078,5353,80,443",
+      "label": {
+        "en": "TCP Probe Ports",
+        "no": "TCP Søkeporter"
+      },
+      "hint": {
+        "en": "Comma-separated TCP ports to probe.",
+        "no": "Kommaseparert liste med TCP-porter for tilkoblingstest."
+      }
+    }
+  ]
+}

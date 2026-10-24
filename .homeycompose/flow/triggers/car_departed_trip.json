@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "A vehicle left on a trip",
+    "no": "En bil dro på tur"
+  },
+  "hint": {
+    "en": "Triggers when a vehicle leaves and is confirmed on a trip",
+    "no": "Trigges når en bil forlater Wi-Fi og bekreftes på en faktisk tur"
+  },
+  "tokens": [
+    {
+      "name": "car_name",
+      "type": "string",
+      "title": {
+        "en": "Vehicle Name",
+        "no": "Bilens navn"
+      },
+      "example": "Tesla MY"
+    }
+  ]
+}

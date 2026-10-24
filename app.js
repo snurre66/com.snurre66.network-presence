@@ -19,6 +19,12 @@ class NetworkPresenceApp extends Homey.App {
     this.triggerGuestTurnedHome = this.homey.flow.getTriggerCard('guest_turned_home');
     this.triggerGuestTurnedAway = this.homey.flow.getTriggerCard('guest_turned_away');
 
+    // Register Car App-level Flow triggers
+    this.triggerCarDepartedTrip = this.homey.flow.getTriggerCard('car_departed_trip');
+    this.triggerCarArrivedTrip = this.homey.flow.getTriggerCard('car_arrived_trip');
+    this.triggerCarSleptIdle = this.homey.flow.getTriggerCard('car_slept_idle');
+    this.triggerCarWokeIdle = this.homey.flow.getTriggerCard('car_woke_idle');
+
     // Register Flow conditions
     const conditionIsHome = this.homey.flow.getConditionCard('is_home');
     if (conditionIsHome) {
@@ -34,6 +40,20 @@ class NetworkPresenceApp extends Homey.App {
       });
     }
 
+    const conditionCarIsHome = this.homey.flow.getConditionCard('car_device_is_home');
+    if (conditionCarIsHome) {
+      conditionCarIsHome.registerRunListener(async (args) => {
+        return args.device.isCurrentlyPresent();
+      });
+    }
+
+    const conditionCarIsOnTrip = this.homey.flow.getConditionCard('car_device_is_on_trip');
+    if (conditionCarIsOnTrip) {
+      conditionCarIsOnTrip.registerRunListener(async (args) => {
+        return args.device.getTripState ? args.device.getTripState() : false;
+      });
+    }
+
     // Register Flow actions
     const actionForceProbe = this.homey.flow.getActionCard('force_probe');
     if (actionForceProbe) {
@@ -46,6 +66,23 @@ class NetworkPresenceApp extends Homey.App {
     if (actionGuestForceProbe) {
       actionGuestForceProbe.registerRunListener(async (args) => {
         return args.device.forceProbe();
+      });
+    }
+
+    const actionCarForceProbe = this.homey.flow.getActionCard('car_device_force_probe');
+    if (actionCarForceProbe) {
+      actionCarForceProbe.registerRunListener(async (args) => {
+        return args.device.forceProbe();
+      });
+    }
+
+    const actionCarSetOnTrip = this.homey.flow.getActionCard('car_device_set_on_trip');
+    if (actionCarSetOnTrip) {
+      actionCarSetOnTrip.registerRunListener(async (args) => {
+        if (args.device && args.device.setTripState) {
+          await args.device.setTripState(args.on_trip);
+        }
+        return true;
       });
     }
 

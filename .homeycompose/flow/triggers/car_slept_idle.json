@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "A vehicle fell asleep (idle)",
+    "no": "En bil sovnet i oppkjørselen (dvale)"
+  },
+  "hint": {
+    "en": "Triggers when a vehicle disconnects from Wi-Fi without departure trigger",
+    "no": "Trigges når en bil kobler fra Wi-Fi uten forvarsel/avreisevindu"
+  },
+  "tokens": [
+    {
+      "name": "car_name",
+      "type": "string",
+      "title": {
+        "en": "Vehicle Name",
+        "no": "Bilens navn"
+      },
+      "example": "Tesla MY"
+    }
+  ]
+}

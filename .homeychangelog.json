@@ -11,5 +11,9 @@
   "1.0.5": {
     "en": "Added dedicated Guest driver and flow cards for guest presence tracking.",
     "no": "Lagt til dedikert Gjest-driver og flytkort for automatisk gjestestyring."
+  },
+  "1.0.6": {
+    "en": "Added dedicated Car driver with independent trip tracking per vehicle.",
+    "no": "Lagt til dedikert Bil-driver med uavhengig turtilstand og dvaledeteksjon per bil."
   }
 }

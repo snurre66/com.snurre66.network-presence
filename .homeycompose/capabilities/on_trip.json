@@ -1,0 +1,24 @@
+{
+  "type": "boolean",
+  "title": {
+    "en": "On Trip",
+    "no": "På tur"
+  },
+  "desc": {
+    "en": "True when the vehicle has left on a confirmed trip.",
+    "no": "Sann når kjøretøyet har dratt på en bekreftet tur."
+  },
+  "getable": true,
+  "setable": true,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "On Trip",
+    "no": "På tur"
+  },
+  "insightsTitleFalse": {
+    "en": "Parked / Idle",
+    "no": "Parkert / Dvale"
+  },
+  "uiComponent": "sensor",
+  "icon": "/assets/capabilities/on_trip.svg"
+}

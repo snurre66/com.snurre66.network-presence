@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.snurre66.network-presence",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "brandColor": "#1E88E5",
@@ -27,6 +27,94 @@
   },
   "flow": {
     "triggers": [
+      {
+        "title": {
+          "en": "A vehicle arrived from a trip",
+          "no": "En bil kom hjem fra tur"
+        },
+        "hint": {
+          "en": "Triggers when a vehicle returns home from a confirmed trip",
+          "no": "Trigges når en bil kommer hjem etter en bekreftet tur"
+        },
+        "tokens": [
+          {
+            "name": "car_name",
+            "type": "string",
+            "title": {
+              "en": "Vehicle Name",
+              "no": "Bilens navn"
+            },
+            "example": "Tesla MY"
+          }
+        ],
+        "id": "car_arrived_trip"
+      },
+      {
+        "title": {
+          "en": "A vehicle left on a trip",
+          "no": "En bil dro på tur"
+        },
+        "hint": {
+          "en": "Triggers when a vehicle leaves and is confirmed on a trip",
+          "no": "Trigges når en bil forlater Wi-Fi og bekreftes på en faktisk tur"
+        },
+        "tokens": [
+          {
+            "name": "car_name",
+            "type": "string",
+            "title": {
+              "en": "Vehicle Name",
+              "no": "Bilens navn"
+            },
+            "example": "Tesla MY"
+          }
+        ],
+        "id": "car_departed_trip"
+      },
+      {
+        "title": {
+          "en": "A vehicle fell asleep (idle)",
+          "no": "En bil sovnet i oppkjørselen (dvale)"
+        },
+        "hint": {
+          "en": "Triggers when a vehicle disconnects from Wi-Fi without departure trigger",
+          "no": "Trigges når en bil kobler fra Wi-Fi uten forvarsel/avreisevindu"
+        },
+        "tokens": [
+          {
+            "name": "car_name",
+            "type": "string",
+            "title": {
+              "en": "Vehicle Name",
+              "no": "Bilens navn"
+            },
+            "example": "Tesla MY"
+          }
+        ],
+        "id": "car_slept_idle"
+      },
+      {
+        "title": {
+          "en": "A vehicle woke up from sleep (idle)",
+          "no": "En bil våknet fra dvale (i oppkjørselen)"
+        },
+        "hint": {
+          "en": "Triggers when a vehicle reconnects to Wi-Fi while still parked at home",
+          "no": "Trigges når en bil kobler til Wi-Fi igjen etter dvale i oppkjørselen"
+        },
+        "tokens": [
+          {
+            "name": "car_name",
+            "type": "string",
+            "title": {
+              "en": "Vehicle Name",
+              "no": "Bilens navn"
+            },
+            "example": "Tesla MY"
+          }
+        ],
+        "id": "car_woke_idle"
+      },
       {
         "title": {
           "en": "A guest left",
@@ -70,6 +158,90 @@
           }
         ],
         "id": "guest_turned_home"
+      },
+      {
+        "id": "car_device_turned_home",
+        "title": {
+          "en": "Car connected to Wi-Fi",
+          "no": "Bil koblet til Wi-Fi"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
+      },
+      {
+        "id": "car_device_turned_away",
+        "title": {
+          "en": "Car disconnected from Wi-Fi",
+          "no": "Bil koblet fra Wi-Fi"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
+      },
+      {
+        "id": "car_device_departed_trip",
+        "title": {
+          "en": "This car left on a trip",
+          "no": "Denne bilen dro på tur"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
+      },
+      {
+        "id": "car_device_arrived_trip",
+        "title": {
+          "en": "This car arrived from a trip",
+          "no": "Denne bilen kom hjem fra tur"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
+      },
+      {
+        "id": "car_device_slept_idle",
+        "title": {
+          "en": "This car fell asleep (idle)",
+          "no": "Denne bilen sovnet i oppkjørselen"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
+      },
+      {
+        "id": "car_device_woke_idle",
+        "title": {
+          "en": "This car woke up from sleep (idle)",
+          "no": "Denne bilen våknet fra dvale"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
       },
       {
         "id": "guest_device_turned_home",
@@ -130,6 +302,34 @@
     ],
     "conditions": [
       {
+        "id": "car_device_is_home",
+        "title": {
+          "en": "Car is !{{connected to Wi-Fi|disconnected}}",
+          "no": "Bil er !{{tilkoblet Wi-Fi|frakoblet}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
+      },
+      {
+        "id": "car_device_is_on_trip",
+        "title": {
+          "en": "Car is !{{on a trip|parked/idle}}",
+          "no": "Bil er !{{på tur|parkert/i dvale}}"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
+      },
+      {
         "id": "guest_device_is_home",
         "title": {
           "en": "Guest is !{{at home|away}}",
@@ -159,6 +359,46 @@
       }
     ],
     "actions": [
+      {
+        "id": "car_device_force_probe",
+        "title": {
+          "en": "Force vehicle check",
+          "no": "Tving bilsjekk"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          }
+        ]
+      },
+      {
+        "id": "car_device_set_on_trip",
+        "title": {
+          "en": "Set trip state",
+          "no": "Sett turtilstand for bil"
+        },
+        "titleFormatted": {
+          "en": "Set trip state to [[on_trip]]",
+          "no": "Sett turtilstand til [[on_trip]]"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=car"
+          },
+          {
+            "name": "on_trip",
+            "type": "checkbox",
+            "title": {
+              "en": "On Trip",
+              "no": "På tur"
+            }
+          }
+        ]
+      },
       {
         "id": "guest_device_force_probe",
         "title": {
@@ -190,6 +430,122 @@
     ]
   },
   "drivers": [
+    {
+      "name": {
+        "en": "Car / Vehicle",
+        "no": "Bil / Kjøretøy"
+      },
+      "class": "sensor",
+      "capabilities": [
+        "at_home",
+        "on_trip",
+        "last_seen"
+      ],
+      "capabilitiesOptions": {
+        "at_home": {
+          "title": {
+            "en": "Wi-Fi Connected",
+            "no": "Wi-Fi tilkoblet"
+          }
+        },
+        "on_trip": {
+          "title": {
+            "en": "On Trip",
+            "no": "På tur"
+          }
+        },
+        "last_seen": {
+          "title": {
+            "en": "Last Seen",
+            "no": "Sist sett"
+          }
+        }
+      },
+      "images": {
+        "small": "/drivers/car/assets/images/small.png",
+        "large": "/drivers/car/assets/images/large.png",
+        "xlarge": "/drivers/car/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "select_device"
+        }
+      ],
+      "settings": [
+        {
+          "id": "ip",
+          "type": "text",
+          "label": {
+            "en": "IP Address",
+            "no": "IP-adresse"
+          },
+          "value": "",
+          "hint": {
+            "en": "Current IP address of the vehicle (e.g. 192.168.68.55)",
+            "no": "Nåværende IP-adresse til bilen (f.eks. 192.168.68.55)"
+          }
+        },
+        {
+          "id": "hostname",
+          "type": "text",
+          "label": {
+            "en": "mDNS / Bonjour Hostname",
+            "no": "mDNS / Bonjour Vertsnavn"
+          },
+          "value": "",
+          "hint": {
+            "en": "Local hostname ending in .local (e.g. Tesla-MY.local). Allows automatic tracking if IP changes.",
+            "no": "Lokalt vertsnavn som slutter på .local (f.eks. Tesla-MY.local). Tillater automatisk gjenkjenning dersom IP endres."
+          }
+        },
+        {
+          "id": "away_delay",
+          "type": "number",
+          "min": 1,
+          "max": 60,
+          "step": 1,
+          "value": 2,
+          "label": {
+            "en": "Away Grace Period (minutes)",
+            "no": "Forsinkelse før borte (minutter)"
+          },
+          "hint": {
+            "en": "Minutes of silence before marking as away (recommended 2 min for vehicles)",
+            "no": "Minutter uten kontakt før status settes til borte (anbefalt 2 min for bil)"
+          }
+        },
+        {
+          "id": "probe_interval",
+          "type": "number",
+          "min": 5,
+          "max": 300,
+          "step": 5,
+          "value": 15,
+          "label": {
+            "en": "Polling Interval (seconds)",
+            "no": "Søkeintervall (sekunder)"
+          },
+          "hint": {
+            "en": "How often to ping the vehicle when absent (recommended 15s for fast arrival response)",
+            "no": "Hvor ofte bilen søkes opp når den er borte (anbefalt 15s for rask respons ved ankomst)"
+          }
+        },
+        {
+          "id": "tcp_ports",
+          "type": "text",
+          "value": "62078,5353,80,443",
+          "label": {
+            "en": "TCP Probe Ports",
+            "no": "TCP Søkeporter"
+          },
+          "hint": {
+            "en": "Comma-separated TCP ports to probe.",
+            "no": "Kommaseparert liste med TCP-porter for tilkoblingstest."
+          }
+        }
+      ],
+      "id": "car"
+    },
     {
       "name": {
         "en": "Guest",
@@ -504,6 +860,30 @@
       "setable": false,
       "uiComponent": "sensor",
       "icon": "/assets/capabilities/last_seen.svg"
+    },
+    "on_trip": {
+      "type": "boolean",
+      "title": {
+        "en": "On Trip",
+        "no": "På tur"
+      },
+      "desc": {
+        "en": "True when the vehicle has left on a confirmed trip.",
+        "no": "Sann når kjøretøyet har dratt på en bekreftet tur."
+      },
+      "getable": true,
+      "setable": true,
+      "insights": true,
+      "insightsTitleTrue": {
+        "en": "On Trip",
+        "no": "På tur"
+      },
+      "insightsTitleFalse": {
+        "en": "Parked / Idle",
+        "no": "Parkert / Dvale"
+      },
+      "uiComponent": "sensor",
+      "icon": "/assets/capabilities/on_trip.svg"
     }
   }
 }

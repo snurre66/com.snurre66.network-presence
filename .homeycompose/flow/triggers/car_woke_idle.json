@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "A vehicle woke up from sleep (idle)",
+    "no": "En bil våknet fra dvale (i oppkjørselen)"
+  },
+  "hint": {
+    "en": "Triggers when a vehicle reconnects to Wi-Fi while still parked at home",
+    "no": "Trigges når en bil kobler til Wi-Fi igjen etter dvale i oppkjørselen"
+  },
+  "tokens": [
+    {
+      "name": "car_name",
+      "type": "string",
+      "title": {
+        "en": "Vehicle Name",
+        "no": "Bilens navn"
+      },
+      "example": "Tesla MY"
+    }
+  ]
+}

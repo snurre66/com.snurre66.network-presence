@@ -1,0 +1,92 @@
+{
+  "triggers": [
+    {
+      "id": "car_device_turned_home",
+      "title": {
+        "en": "Car connected to Wi-Fi",
+        "no": "Bil koblet til Wi-Fi"
+      }
+    },
+    {
+      "id": "car_device_turned_away",
+      "title": {
+        "en": "Car disconnected from Wi-Fi",
+        "no": "Bil koblet fra Wi-Fi"
+      }
+    },
+    {
+      "id": "car_device_departed_trip",
+      "title": {
+        "en": "This car left on a trip",
+        "no": "Denne bilen dro på tur"
+      }
+    },
+    {
+      "id": "car_device_arrived_trip",
+      "title": {
+        "en": "This car arrived from a trip",
+        "no": "Denne bilen kom hjem fra tur"
+      }
+    },
+    {
+      "id": "car_device_slept_idle",
+      "title": {
+        "en": "This car fell asleep (idle)",
+        "no": "Denne bilen sovnet i oppkjørselen"
+      }
+    },
+    {
+      "id": "car_device_woke_idle",
+      "title": {
+        "en": "This car woke up from sleep (idle)",
+        "no": "Denne bilen våknet fra dvale"
+      }
+    }
+  ],
+  "conditions": [
+    {
+      "id": "car_device_is_home",
+      "title": {
+        "en": "Car is !{{connected to Wi-Fi|disconnected}}",
+        "no": "Bil er !{{tilkoblet Wi-Fi|frakoblet}}"
+      }
+    },
+    {
+      "id": "car_device_is_on_trip",
+      "title": {
+        "en": "Car is !{{on a trip|parked/idle}}",
+        "no": "Bil er !{{på tur|parkert/i dvale}}"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "car_device_force_probe",
+      "title": {
+        "en": "Force vehicle check",
+        "no": "Tving bilsjekk"
+      }
+    },
+    {
+      "id": "car_device_set_on_trip",
+      "title": {
+        "en": "Set trip state",
+        "no": "Sett turtilstand for bil"
+      },
+      "titleFormatted": {
+        "en": "Set trip state to [[on_trip]]",
+        "no": "Sett turtilstand til [[on_trip]]"
+      },
+      "args": [
+        {
+          "name": "on_trip",
+          "type": "checkbox",
+          "title": {
+            "en": "On Trip",
+            "no": "På tur"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "title": {
+    "en": "A vehicle arrived from a trip",
+    "no": "En bil kom hjem fra tur"
+  },
+  "hint": {
+    "en": "Triggers when a vehicle returns home from a confirmed trip",
+    "no": "Trigges når en bil kommer hjem etter en bekreftet tur"
+  },
+  "tokens": [
+    {
+      "name": "car_name",
+      "type": "string",
+      "title": {
+        "en": "Vehicle Name",
+        "no": "Bilens navn"
+      },
+      "example": "Tesla MY"
+    }
+  ]
+}
