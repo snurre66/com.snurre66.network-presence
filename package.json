@@ -1,10 +1,10 @@
 {
   "name": "com.snurre66.network-presence",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Robust network presence detection for Homey Pro without any phone app.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "node test/timeHelper.test.js"
   },
   "repository": {
     "type": "git",

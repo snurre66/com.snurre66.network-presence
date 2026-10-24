@@ -15,5 +15,9 @@
   "1.0.6": {
     "en": "Added dedicated Car driver with independent trip tracking per vehicle.",
     "no": "Lagt til dedikert Bil-driver med uavhengig turtilstand og dvaledeteksjon per bil."
+  },
+  "1.0.7": {
+    "en": "Persist last seen timestamps in device store, fix relative date formatting, and roll over relative dates across midnight.",
+    "no": "Lagre sist sett-tidspunkt i enhetslager, rett relativ datoberegning og oppdater visning automatisk over midnatt."
   }
 }

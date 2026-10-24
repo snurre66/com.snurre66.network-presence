@@ -5,4 +5,5 @@ package-lock.json
 .gitignore
 .homeybuild/
 .homeycompose/
+test/
 README.md
